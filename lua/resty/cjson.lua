@@ -27,9 +27,6 @@ cJSON *cJSON_Parse(const char *value);
 char  *cJSON_Print(cJSON *item);
 char  *cJSON_PrintUnformatted(cJSON *item);
 void   cJSON_Delete(cJSON *c);
-
-const char *cJSON_GetErrorPtr(void);
-
 cJSON *cJSON_CreateNull(void);
 cJSON *cJSON_CreateTrue(void);
 cJSON *cJSON_CreateFalse(void);
@@ -38,11 +35,8 @@ cJSON *cJSON_CreateNumber(double num);
 cJSON *cJSON_CreateString(const char *string);
 cJSON *cJSON_CreateArray(void);
 cJSON *cJSON_CreateObject(void);
-
 void   cJSON_AddItemToArray(cJSON *array, cJSON *item);
 void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
-
-cJSON *cJSON_ParseWithOpts(const char *value,const char **return_parse_end,int require_null_terminated);
 void   cJSON_Minify(char *json);
 ]]
 
@@ -107,7 +101,7 @@ function json.decode(value)
     local t
     if j == nil then return nil end
     if j.type == 5 or j.type == 6 then
-        t = json.parse(j.child)
+        t = json.parse(j.child) or {}
     else
         t = json.parse(j)
     end
