@@ -144,12 +144,18 @@ function json.encval(value)
     return j
 end
 
-function json.encode(value)
+function json.encode(value, formatted)
     local j = json.encval(value)
     if j == nil then
         return nil
     else
-        local r = ffi_str(cjson.cJSON_Print(j))
+        local f = formatted or true
+        local r
+        if f then
+            r = ffi_str(cjson.cJSON_Print(j))
+        else
+            r = ffi_str(cjson.cJSON_PrintUnformatted(j))
+        end
         cjson.cJSON_Delete(j)
         return r
     end
