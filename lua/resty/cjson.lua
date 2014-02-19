@@ -1,38 +1,35 @@
 local ffi        = require "ffi"
 local ffi_new    = ffi.new
+local ffi_typeof = ffi.typeof
 local ffi_cdef   = ffi.cdef
 local ffi_load   = ffi.load
 local ffi_str    = ffi.string
-local C          = ffi.C
-local ffi_string = ffi.string
-
-local cjson = ffi_load("cjson")
+local next       = next
+local floor      = math.floor
+local max        = math.max
+local type       = type
+local next       = next
+local pairs      = pairs
+local ipairs     = ipairs
 
 ffi_cdef[[
 typedef struct cJSON {
     struct cJSON *next, *prev;
     struct cJSON *child;
-    int type;
-    char *valuestring;
-    int valueint;
+    int    type;
+    char  *valuestring;
+    int    valueint;
     double valuedouble;
     char *string;
 } cJSON;
 
-typedef struct cJSON_Hooks {
-    void *(*malloc_fn)(size_t sz);
-    void (*free_fn)(void *ptr);
-} cJSON_Hooks;
-
-void cJSON_InitHooks(cJSON_Hooks* hooks);
 cJSON *cJSON_Parse(const char *value);
 char  *cJSON_Print(cJSON *item);
 char  *cJSON_PrintUnformatted(cJSON *item);
 void   cJSON_Delete(cJSON *c);
-int	  cJSON_GetArraySize(cJSON *array);
-cJSON *cJSON_GetArrayItem(cJSON *array,int item);
-cJSON *cJSON_GetObjectItem(cJSON *object,const char *string);
+
 const char *cJSON_GetErrorPtr(void);
+
 cJSON *cJSON_CreateNull(void);
 cJSON *cJSON_CreateTrue(void);
 cJSON *cJSON_CreateFalse(void);
@@ -42,66 +39,140 @@ cJSON *cJSON_CreateString(const char *string);
 cJSON *cJSON_CreateArray(void);
 cJSON *cJSON_CreateObject(void);
 
-cJSON *cJSON_CreateIntArray(const int *numbers,int count);
-cJSON *cJSON_CreateFloatArray(const float *numbers,int count);
-cJSON *cJSON_CreateDoubleArray(const double *numbers,int count);
-cJSON *cJSON_CreateStringArray(const char **strings,int count);
-
 void cJSON_AddItemToArray(cJSON *array, cJSON *item);
 void cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
-void cJSON_AddItemReferenceToArray(cJSON *array, cJSON *item);
-void cJSON_AddItemReferenceToObject(cJSON *object,const char *string,cJSON *item);
 
-cJSON *cJSON_DetachItemFromArray(cJSON *array,int which);
-void   cJSON_DeleteItemFromArray(cJSON *array,int which);
-cJSON *cJSON_DetachItemFromObject(cJSON *object,const char *string);
-void   cJSON_DeleteItemFromObject(cJSON *object,const char *string);
-
-void cJSON_ReplaceItemInArray(cJSON *array,int which,cJSON *newitem);
-void cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
-
-cJSON *cJSON_Duplicate(cJSON *item,int recurse);
 cJSON *cJSON_ParseWithOpts(const char *value,const char **return_parse_end,int require_null_terminated);
-
 void cJSON_Minify(char *json);
 ]]
 
+local cjson = ffi_load("cjson")
+local json = {}
+local char_t = ffi_typeof("char[?]")
 
-local function parse(j)
-    if j == nil then return nil end
-    local r = {}
-    repeat
-        local t = j.type
-        local n = #r + 1
-        if j.string ~= nil then
-            n = ffi_str(j.string)
+local function is_array(t)
+    local m, c = 0, 0
+    for k, _ in pairs(t) do
+        if type(k) ~= 'number' or k < 0 or floor(k) ~= k then
+            return false
+        else
+            m = max(m, k)
+            c = c + 1
         end
-        if t == 0 then
-            r[n] = false
-        elseif t == 1 then
-            r[n] = true
-        elseif t == 2 then
-            r[n] = nil
-        elseif t == 3 then
-            r[n] = j.valuedouble
-        elseif t == 4 then
-            r[n] = ffi_str(j.valuestring)
-        elseif t == 5 then
-            r[n] = parse(j.child)
-        elseif t == 6 then
-            r[n] = parse(j.child)
-        end
-        j = j.next
-    until j == nil
-    return r
+    end
+    return c == m
 end
 
-local function decode(json)
-    local j = cjson.cJSON_Parse(json)
-    if j == nil then return nil end
-    if j.type == 5 or j.type == 6 then
-        return parse(j.child)
+function json.decval(j)
+    local t = j.type
+    if     t == 0 then
+        return false
+    elseif t == 1 then
+        return true
+    elseif t == 2 then
+        return ngx.null
+    elseif t == 3 then
+        return j.valuedouble
+    elseif t == 4 then
+        return ffi_str(j.valuestring)
+    elseif t == 5 or t == 6 then
+        return json.parse(j.child)
     else
-        return parse(j)
+        return nil
     end
 end
+
+function json.parse(j)
+    if j == nil then
+        return nil
+    else
+        local c = j;
+        local t = {}
+        repeat
+            local n
+            if c.string ~= nil then
+                n = ffi_str(c.string)
+            else
+                n = #t + 1
+            end
+            t[n] = json.decval(c)
+            c = c.next
+        until c == nil
+        return t
+    end
+end
+
+function json.decode(value)
+    local j = cjson.cJSON_Parse(value)
+    local t
+    if j == nil then return nil end
+    if j.type == 5 or j.type == 6 then
+        t = json.parse(j.child)
+    else
+        t = json.parse(j)
+    end
+    cjson.cJSON_Delete(j)
+    return t
+end
+
+function json.encval(value)
+    local  t = type(value)
+    local  j = nil
+    if     t == "string" then
+        j = cjson.cJSON_CreateString(value)
+    elseif t == "number" then
+        j = cjson.cJSON_CreateNumber(value)
+    elseif t == "boolean" then
+        if value then
+            j = cjson.cJSON_CreateTrue()
+        else
+            j = cjson.cJSON_CreateFalse()
+        end
+    elseif t == "nil" then
+        j = cjson.cJSON_CreateNull()
+    elseif t == "table" then
+        if next(value) == nil then
+            j = cjson.cJSON_CreateObject()
+        else
+            if (is_array(value)) then
+                j = cjson.cJSON_CreateArray()
+                for _, v in ipairs(value) do
+                    cjson.cJSON_AddItemToArray(j[0], json.encval(v))
+                end
+            else
+                j = cjson.cJSON_CreateObject()
+                for k, v in pairs(value) do
+                    cjson.cJSON_AddItemToObject(j[0], tostring(k), json.encval(v))
+                end
+            end
+        end
+    end
+    return j
+end
+
+function json.encode(value)
+    local j = json.encval(value)
+    if j == nil then
+        return nil
+    else
+        local r = ffi_str(cjson.cJSON_Print(j))
+        cjson.cJSON_Delete(j)
+        return r
+    end
+end
+
+function json.minify(value)
+    local t = value
+    if type(t) ~= "string" then
+        t = json.encode(t)
+    end
+    local m = ffi_new(char_t, #t, t)
+    cjson.cJSON_Minify(m)
+    return ffi_str(m)
+end
+
+return {
+    decode = json.decode,
+    encode = json.encode,
+    minify = json.minify
+}
