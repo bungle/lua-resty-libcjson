@@ -39,11 +39,11 @@ cJSON *cJSON_CreateString(const char *string);
 cJSON *cJSON_CreateArray(void);
 cJSON *cJSON_CreateObject(void);
 
-void cJSON_AddItemToArray(cJSON *array, cJSON *item);
-void cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
+void   cJSON_AddItemToArray(cJSON *array, cJSON *item);
+void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
 
 cJSON *cJSON_ParseWithOpts(const char *value,const char **return_parse_end,int require_null_terminated);
-void cJSON_Minify(char *json);
+void   cJSON_Minify(char *json);
 ]]
 
 local cjson = ffi_load("cjson")
