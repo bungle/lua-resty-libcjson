@@ -43,6 +43,8 @@ void   cJSON_Minify(char *json);
 local cjson = ffi_load("cjson")
 local json = {}
 local char_t = ffi_typeof("char[?]")
+local mt_arr = { __index = { __jsontype = 'array'  }}
+local mt_obj = { __index = { __jsontype = 'object' }}
 
 local function is_array(t)
     local m, c = 0, 0
@@ -69,8 +71,18 @@ function json.decval(j)
         return j.valuedouble
     elseif t == 4 then
         return ffi_str(j.valuestring)
-    elseif t == 5 or t == 6 then
-        return json.parse(j.child)
+    elseif t == 5 then
+        if j.child == nil then
+            return setmetatable({}, mt_arr)
+        else
+            return setmetatable(json.parse(j.child), mt_arr)
+        end
+    elseif t == 6 then
+        if j.child == nil then
+            return setmetatable({}, mt_obj)
+        else
+            return setmetatable(json.parse(j.child), mt_obj)
+        end
     else
         return nil
     end
@@ -98,15 +110,20 @@ end
 
 function json.decode(value)
     local j = cjson.cJSON_Parse(value)
-    local t
     if j == nil then return nil end
-    if j.type == 5 or j.type == 6 then
-        t = json.parse(j.child) or {}
+    local r
+    local t = j.type
+    if t == 5 then
+        r = json.parse(j.child) or {}
+        r = setmetatable(r, mt_arr)
+    elseif t == 6 then
+        r = json.parse(j.child) or {}
+        r = setmetatable(r, mt_obj)
     else
-        t = json.parse(j)
+        r = json.parse(j)
     end
     cjson.cJSON_Delete(j)
-    return t
+    return r
 end
 
 function json.encval(value)
