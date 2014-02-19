@@ -72,17 +72,9 @@ function json.decval(j)
     elseif t == 4 then
         return ffi_str(j.valuestring)
     elseif t == 5 then
-        if j.child == nil then
-            return setmetatable({}, mt_arr)
-        else
-            return setmetatable(json.parse(j.child), mt_arr)
-        end
+        return setmetatable(json.parse(j.child) or {}, mt_arr)
     elseif t == 6 then
-        if j.child == nil then
-            return setmetatable({}, mt_obj)
-        else
-            return setmetatable(json.parse(j.child), mt_obj)
-        end
+        return setmetatable(json.parse(j.child) or {}, mt_obj)
     else
         return nil
     end
@@ -114,11 +106,9 @@ function json.decode(value)
     local r
     local t = j.type
     if t == 5 then
-        r = json.parse(j.child) or {}
-        r = setmetatable(r, mt_arr)
+        r = setmetatable(json.parse(j.child) or {}, mt_arr)
     elseif t == 6 then
-        r = json.parse(j.child) or {}
-        r = setmetatable(r, mt_obj)
+        r = setmetatable(json.parse(j.child) or {}, mt_obj)
     else
         r = json.parse(j)
     end
