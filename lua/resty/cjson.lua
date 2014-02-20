@@ -20,7 +20,7 @@ typedef struct cJSON {
     char  *valuestring;
     int    valueint;
     double valuedouble;
-    char *string;
+    char  *string;
 } cJSON;
 
 cJSON *cJSON_Parse(const char *value);
