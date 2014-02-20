@@ -27,7 +27,7 @@ cJSON *cJSON_Parse(const char *value);
 char  *cJSON_Print(cJSON *item);
 char  *cJSON_PrintUnformatted(cJSON *item);
 void   cJSON_Delete(cJSON *c);
-int	   cJSON_GetArraySize(cJSON *array);
+int    cJSON_GetArraySize(cJSON *array);
 cJSON *cJSON_CreateNull(void);
 cJSON *cJSON_CreateTrue(void);
 cJSON *cJSON_CreateFalse(void);
