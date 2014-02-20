@@ -147,6 +147,8 @@ function json.encval(value)
                 end
             end
         end
+    elseif value == ngx.null then
+        j = cjson.cJSON_CreateNull()
     end
     return j
 end
