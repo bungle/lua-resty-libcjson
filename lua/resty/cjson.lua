@@ -27,6 +27,7 @@ cJSON *cJSON_Parse(const char *value);
 char  *cJSON_Print(cJSON *item);
 char  *cJSON_PrintUnformatted(cJSON *item);
 void   cJSON_Delete(cJSON *c);
+int	   cJSON_GetArraySize(cJSON *array);
 cJSON *cJSON_CreateNull(void);
 cJSON *cJSON_CreateTrue(void);
 cJSON *cJSON_CreateFalse(void);
@@ -40,16 +41,22 @@ void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
 void   cJSON_Minify(char *json);
 ]]
 
+local ok, new_tab = pcall(require, "table.new")
+
+if not ok then
+    new_tab = function (narr, nrec) return {} end
+end
+
 local cjson = ffi_load("cjson")
-local json = {}
+local json = new_tab(0, 6)
 local char_t = ffi_typeof("char[?]")
-local mt_arr = { __index = { __jsontype = 'array'  }}
-local mt_obj = { __index = { __jsontype = 'object' }}
+local mt_arr = { __index = { __jsontype = "array"  }}
+local mt_obj = { __index = { __jsontype = "object" }}
 
 local function is_array(t)
     local m, c = 0, 0
     for k, _ in pairs(t) do
-        if type(k) ~= 'number' or k < 0 or floor(k) ~= k then
+        if type(k) ~= "number" or k < 0 or floor(k) ~= k then
             return false
         else
             m = max(m, k)
@@ -72,45 +79,47 @@ function json.decval(j)
     elseif t == 4 then
         return ffi_str(j.valuestring)
     elseif t == 5 then
-        return setmetatable(json.parse(j.child) or {}, mt_arr)
+        return setmetatable(json.parse(j.child, cjson.cJSON_GetArraySize(j), 0) or {}, mt_arr)
     elseif t == 6 then
-        return setmetatable(json.parse(j.child) or {}, mt_obj)
+        return setmetatable(json.parse(j.child, 0, cjson.cJSON_GetArraySize(j)) or {}, mt_obj)
     else
         return nil
     end
 end
 
-function json.parse(j)
+function json.parse(j, narr, nrec)
     if j == nil then
         return nil
     else
         local c = j;
-        local t = {}
+        local r = new_tab(narr, nrec)
         repeat
             local n
             if c.string ~= nil then
                 n = ffi_str(c.string)
             else
-                n = #t + 1
+                n = #r + 1
             end
-            t[n] = json.decval(c)
+            r[n] = json.decval(c)
             c = c.next
         until c == nil
-        return t
+        return r
     end
 end
 
 function json.decode(value)
     local j = cjson.cJSON_Parse(value)
-    if j == nil then return nil end
+    if j == nil then
+        return nil
+    end
     local r
     local t = j.type
     if t == 5 then
-        r = setmetatable(json.parse(j.child) or {}, mt_arr)
+        r = setmetatable(json.parse(j.child, cjson.cJSON_GetArraySize(j), 0) or {}, mt_arr)
     elseif t == 6 then
-        r = setmetatable(json.parse(j.child) or {}, mt_obj)
+        r = setmetatable(json.parse(j.child, 0, cjson.cJSON_GetArraySize(j)) or {}, mt_obj)
     else
-        r = json.parse(j)
+        r = json.parse(j, 0, 0)
     end
     cjson.cJSON_Delete(j)
     return r
