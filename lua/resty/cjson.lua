@@ -143,7 +143,10 @@ function json.encval(value)
             else
                 j = cjson.cJSON_CreateObject()
                 for k, v in pairs(value) do
-                    cjson.cJSON_AddItemToObject(j[0], tostring(k), json.encval(v))
+                    if type(k) ~= "string" then
+                        k = tostring(k)
+                    end
+                    cjson.cJSON_AddItemToObject(j[0], k, json.encval(v))
                 end
             end
         end
