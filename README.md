@@ -17,6 +17,7 @@ local nbr = json.decode "1"      -- 1
 local bln = json.decode "true"   -- true
 local str = json.decode '"test"' -- "test"
 local nul = json.decode "null"   -- ngx.null
+local nul = json.decode '""'     -- ""
 local nul = json.decode ""       -- nil
 local nul = json.decode nil      -- nil
 local nul = json.decode()        -- nil
