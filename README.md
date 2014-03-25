@@ -22,7 +22,7 @@ local nul = json.decode nil      -- nil
 local nul = json.decode()        -- nil
 ```
 
-Nested structures are parsed as nested Lua tables.
+Nested JSON structures are parsed as nested Lua tables.
 
 #### string json.encode(value, formatted)
 
