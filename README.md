@@ -53,8 +53,6 @@ Nested Lua tables are encoded as nested JSON structures (JSON objects or arrays)
 `lua-resty-cjson` uses two clause BSD license.
 
 ```
-LuaJIT FFI-based cJSON library for OpenResty
-
 Copyright (c) 2013, Aapo Talvensaari
 All rights reserved.
 
