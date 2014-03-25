@@ -142,9 +142,13 @@ function json.encval(value)
         j = cjson.cJSON_CreateNull()
     elseif t == "table" then
         if next(value) == nil then
-            j = cjson.cJSON_CreateObject()
+            if getmetatable(value) ~= mt_obj and is_array(value) then
+                j = cjson.cJSON_CreateArray()
+            else
+                j = cjson.cJSON_CreateObject()
+            end
         else
-            if (is_array(value)) then
+            if getmetatable(value) ~= mt_obj and is_array(value) then
                 j = cjson.cJSON_CreateArray()
                 for _, v in ipairs(value) do
                     cjson.cJSON_AddItemToArray(j[0], json.encval(v))
@@ -195,5 +199,7 @@ end
 return {
     decode = json.decode,
     encode = json.encode,
-    minify = json.minify
+    minify = json.minify,
+    array  = mt_arr,
+    object = mt_obj
 }
