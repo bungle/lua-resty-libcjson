@@ -5,7 +5,24 @@ LuaJIT FFI-based cJSON library for OpenResty.
 ## Lua API
 #### mixed json.decode(value)
 
-Decodes JSON value or structure, and returns either Lua table or some simple value (e.g. `boolean`, `string`, `number` or `ngx.null`).
+Decodes JSON value or structure (JSON array or object), and returns either Lua `table` or some simple value (e.g. `boolean`, `string`, `number` or `ngx.null`).
+
+##### Example
+
+```lua
+local json = require "resty.cjson"
+local tbl = json.decode "{}"     -- table (with .__jsontype == "object")
+local arr = json.decode "[]"     -- table (with .__jsontype == "array")
+local nbr = json.decode "1"      -- 1
+local bln = json.decode "true"   -- true
+local str = json.decode '"test"' -- "test"
+local nul = json.decode "null"   -- ngx.null
+local nul = json.decode ""       -- nil
+local nul = json.decode nil      -- nil
+local nul = json.decode()        -- nil
+```
+
+Nested structures are parsed as nested Lua tables.
 
 ## License
 
