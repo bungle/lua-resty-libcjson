@@ -174,7 +174,7 @@ function json.encode(value, formatted)
     if j == nil then
         return nil
     else
-        local f = formatted or true
+        local f = formatted ~= false
         local r
         if f then
             r = ffi_str(cjson.cJSON_Print(j))
