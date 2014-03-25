@@ -5,7 +5,7 @@ LuaJIT FFI-based cJSON library for OpenResty.
 ## Lua API
 #### mixed json.decode(value)
 
-Decodes JSON value or structure (JSON array or object), and returns either Lua `table` or some simple value (e.g. `boolean`, `string`, `number` or `ngx.null`).
+Decodes JSON value or structure (JSON array or object), and returns either Lua `table` or some simple value (e.g. `boolean`, `string`, `number`, `nil` or `ngx.null`).
 
 ##### Example
 
@@ -23,6 +23,29 @@ local nul = json.decode()        -- nil
 ```
 
 Nested structures are parsed as nested Lua tables.
+
+#### string json.encode(value, formatted)
+
+Encodes Lua value or table, and returns equivalent JSON value or structure as a string. Optionally you may pass `formatted` argument with value of `false` to get unformatted JSON string as output.
+
+##### Example
+
+```lua
+local json = require "resty.cjson"
+local str = json.encode{}                              -- "[]"
+local str = json.encode(1)                             -- "1"
+local str = json.encode(1.1)                           -- "1.100000"
+local str = json.encode"test"                          -- '"test"'
+local str = json.encode""                              -- '""'
+local str = json.encode(false)                         -- "false"
+local str = json.encode(nil)                           -- "null"
+local str = json.encode(ngx.null)                      -- "null"
+local str = json.encode()                              -- "null"
+local str = json.encode{ a = "b" }                     -- '{"a":"b"}'
+local str = json.encode(setmetatable({}, json.object)) -- "{}"
+```
+
+Nested Lua tables are encoded as nested JSON structures (JSON objects or arrays).
 
 ## License
 
