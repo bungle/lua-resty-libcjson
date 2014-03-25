@@ -119,7 +119,7 @@ function json.decode(value)
     elseif t == 6 then
         r = setmetatable(json.parse(j.child, 0, cjson.cJSON_GetArraySize(j)) or {}, mt_obj)
     else
-        r = json.parse(j, 0, 0)
+        r = json.decval(j)
     end
     cjson.cJSON_Delete(j)
     return r
