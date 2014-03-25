@@ -11,8 +11,8 @@ Decodes JSON value or structure (JSON array or object), and returns either Lua `
 
 ```lua
 local json = require "resty.cjson"
-local tbl = json.decode "{}"     -- table (with .__jsontype == "object")
-local arr = json.decode "[]"     -- table (with .__jsontype == "array")
+local obj = json.decode "{}"     -- table (with obj.__jsontype == "object")
+local arr = json.decode "[]"     -- table (with arr.__jsontype == "array")
 local nbr = json.decode "1"      -- 1
 local bln = json.decode "true"   -- true
 local str = json.decode '"test"' -- "test"
