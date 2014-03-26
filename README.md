@@ -34,6 +34,7 @@ Encodes Lua value or table, and returns equivalent JSON value or structure as a 
 ```lua
 local json = require "resty.cjson"
 local str = json.encode{}                              -- "[]"
+local str = json.encode(setmetatable({}, json.object)) -- "{}"
 local str = json.encode(1)                             -- "1"
 local str = json.encode(1.1)                           -- "1.100000"
 local str = json.encode"test"                          -- '"test"'
@@ -43,7 +44,6 @@ local str = json.encode(nil)                           -- "null"
 local str = json.encode(ngx.null)                      -- "null"
 local str = json.encode()                              -- "null"
 local str = json.encode{ a = "b" }                     -- '{"a":"b"}'
-local str = json.encode(setmetatable({}, json.object)) -- "{}"
 local str = json.encode{ "a", b = 1 }                  -- '{ "1": "a", "b": 1 }'
 
 ```
