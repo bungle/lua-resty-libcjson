@@ -16,10 +16,10 @@ local arr = json.decode "[]"     -- table (with arr.__jsontype == "array")
 local nbr = json.decode "1"      -- 1
 local bln = json.decode "true"   -- true
 local str = json.decode '"test"' -- "test"
+local str = json.decode '""'     -- ""
 local nul = json.decode "null"   -- ngx.null
-local nul = json.decode '""'     -- ""
 local nul = json.decode ""       -- nil
-local nul = json.decode nil      -- nil
+local nul = json.decode(nil)     -- nil
 local nul = json.decode()        -- nil
 ```
 
@@ -44,6 +44,8 @@ local str = json.encode(ngx.null)                      -- "null"
 local str = json.encode()                              -- "null"
 local str = json.encode{ a = "b" }                     -- '{"a":"b"}'
 local str = json.encode(setmetatable({}, json.object)) -- "{}"
+local str = json.encode{ "a", b = 1 }                  -- '{ "1": "a", "b": 1 }'
+
 ```
 
 Nested Lua tables are encoded as nested JSON structures (JSON objects or arrays).
