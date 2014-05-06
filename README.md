@@ -7,7 +7,7 @@ LuaJIT FFI-based cJSON library for OpenResty.
 These are just rudimentary notes. Better installation instructions will follow:
 
 1. First download cJSON (zip-file) from here: http://sourceforge.net/projects/cjson/files/latest/download
-2. Unzip/Extract the package
+2. Unzip / Extract the archive
 3. Run `gcc cJSON.c -o cjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -o cjson.so -shared` (OSX)
 4. Place cjson.so in Lua's `package.cpath` (or modify `cjson.lua` and point `ffi_load("cjson")` with full path to `cjson.so`).
 
