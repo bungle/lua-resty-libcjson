@@ -64,6 +64,10 @@ local str = json.encode{ 1, 1.1, "a", "", false }      -- '[1, 1.100000, "a", ""
 
 Nested Lua tables are encoded as nested JSON structures (JSON objects or arrays).
 
+#### About JSON Arrays and Object Encoding and Decoding
+
+See this comment: https://github.com/bungle/lua-resty-cjson/issues/1#issuecomment-38567447.
+
 ## License
 
 `lua-resty-cjson` uses two clause BSD license.
