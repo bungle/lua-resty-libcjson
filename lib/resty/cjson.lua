@@ -11,6 +11,10 @@ local type       = type
 local next       = next
 local pairs      = pairs
 local ipairs     = ipairs
+local null       = {}
+if ngx and ngx.null then
+    null = ngx.null
+end
 
 ffi_cdef[[
 typedef struct cJSON {
@@ -73,7 +77,7 @@ function json.decval(j)
     elseif t == 1 then
         return true
     elseif t == 2 then
-        return ngx.null
+        return null
     elseif t == 3 then
         return j.valuedouble
     elseif t == 4 then
@@ -108,6 +112,9 @@ function json.parse(j, narr, nrec)
 end
 
 function json.decode(value)
+    if type(value) ~= "string" then
+        return value
+    end
     local j = cjson.cJSON_Parse(value)
     if j == nil then
         return nil
@@ -127,7 +134,7 @@ end
 
 function json.encval(value)
     local  t = type(value)
-    local  j = nil
+    local  j
     if     t == "string" then
         j = cjson.cJSON_CreateString(value)
     elseif t == "number" then
@@ -163,7 +170,7 @@ function json.encval(value)
                 end
             end
         end
-    elseif value == ngx.null then
+    elseif value == null then
         j = cjson.cJSON_CreateNull()
     end
     return j
@@ -201,5 +208,6 @@ return {
     encode = json.encode,
     minify = json.minify,
     array  = mt_arr,
-    object = mt_obj
+    object = mt_obj,
+    null   = null
 }
