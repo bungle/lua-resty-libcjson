@@ -15,22 +15,26 @@ These are just rudimentary notes. Better installation instructions will follow:
 ## Lua API
 #### mixed json.decode(value)
 
-Decodes JSON value or structure (JSON array or object), and returns either Lua `table` or some simple value (e.g. `boolean`, `string`, `number`, `nil` or `ngx.null`).
+Decodes JSON value or structure (JSON array or object), and returns either Lua `table` or some simple value (e.g. `boolean`, `string`, `number`, `nil` or `json.null` (when running in context of OpenResty the `json.null` is the same as `ngx.null`).
 
 ##### Example
 
 ```lua
 local json = require "resty.cjson"
-local obj = json.decode "{}"     -- table (with obj.__jsontype == "object")
-local arr = json.decode "[]"     -- table (with arr.__jsontype == "array")
-local nbr = json.decode "1"      -- 1
-local bln = json.decode "true"   -- true
-local str = json.decode '"test"' -- "test"
-local str = json.decode '""'     -- ""
-local nul = json.decode "null"   -- ngx.null
-local nul = json.decode ""       -- nil
-local nul = json.decode(nil)     -- nil
-local nul = json.decode()        -- nil
+local obj = json.decode "{}"       -- table (with obj.__jsontype == "object")
+local arr = json.decode "[]"       -- table (with arr.__jsontype == "array")
+local nbr = json.decode "1"        -- 1
+local bln = json.decode "true"     -- true
+local str = json.decode '"test"'   -- "test"
+local str = json.decode '""'       -- ""
+local num = json.decode(5)         -- 5
+local num = json.decode(math)      -- math
+local num = json.decode(json.null) -- json.null
+local nul = json.decode "null"     -- json.null
+local nul = json.decode ""         -- nil
+local nul = json.decode(nil)       -- nil
+local nul = json.decode()          -- nil
+
 ```
 
 Nested JSON structures are parsed as nested Lua tables.
@@ -51,7 +55,7 @@ local str = json.encode "test"                         -- '"test"'
 local str = json.encode ""                             -- '""'
 local str = json.encode(false)                         -- "false"
 local str = json.encode(nil)                           -- "null"
-local str = json.encode(ngx.null)                      -- "null"
+local str = json.encode(json.null)                      -- "null"
 local str = json.encode()                              -- "null"
 local str = json.encode{ a = "b" }                     -- '{"a":"b"}'
 local str = json.encode{ "a", b = 1 }                  -- '{ "1": "a", "b": 1 }'
