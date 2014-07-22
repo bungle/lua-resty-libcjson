@@ -55,7 +55,7 @@ local str = json.encode "test"                         -- '"test"'
 local str = json.encode ""                             -- '""'
 local str = json.encode(false)                         -- "false"
 local str = json.encode(nil)                           -- "null"
-local str = json.encode(json.null)                    -- "null"
+local str = json.encode(json.null)                     -- "null"
 local str = json.encode()                              -- "null"
 local str = json.encode{ a = "b" }                     -- '{"a":"b"}'
 local str = json.encode{ "a", b = 1 }                  -- '{ "1": "a", "b": 1 }'
