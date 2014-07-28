@@ -34,7 +34,6 @@ local nul = json.decode "null"     -- json.null
 local nul = json.decode ""         -- nil
 local nul = json.decode(nil)       -- nil
 local nul = json.decode()          -- nil
-
 ```
 
 Nested JSON structures are parsed as nested Lua tables.
