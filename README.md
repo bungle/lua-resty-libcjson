@@ -9,7 +9,7 @@ These are just rudimentary notes. Better installation instructions will follow:
 1. First download cJSON (zip-file) from here: http://sourceforge.net/projects/cjson/files/latest/download
 2. Unzip / Extract the archive
 3. Run `gcc cJSON.c -o libcjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -o libcjson.so -shared` (OSX)
-4. Place libcjson.so in Lua's `package.cpath` (or modify `libcjson.lua` and point `ffi_load("libcjson")` with full path to `libcjson.so`, e.g. `local json = ffi_load("/usr/local/lib/lua/5.1/libcjson.so")`).
+4. Place `libcjson.so` in Lua's `package.cpath` (or modify `libcjson.lua` and point `ffi_load("libcjson")` with full path to `libcjson.so`, e.g. `local json = ffi_load("/usr/local/lib/lua/5.1/libcjson.so")`).
 
 
 ## Lua API
