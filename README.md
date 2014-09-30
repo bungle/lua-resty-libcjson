@@ -1,4 +1,4 @@
-# lua-resty-cjson
+# lua-resty-libcjson
 
 LuaJIT FFI-based cJSON library (tested with OpenResty too).
 
@@ -8,8 +8,8 @@ These are just rudimentary notes. Better installation instructions will follow:
 
 1. First download cJSON (zip-file) from here: http://sourceforge.net/projects/cjson/files/latest/download
 2. Unzip / Extract the archive
-3. Run `gcc cJSON.c -o cjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -o cjson.so -shared` (OSX)
-4. Place cjson.so in Lua's `package.cpath` (or modify `cjson.lua` and point `ffi_load("cjson")` with full path to `cjson.so`, e.g. `local cjson = ffi_load("/usr/local/lib/lua/5.1/cjson.so")`).
+3. Run `gcc cJSON.c -o libcjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -o libcjson.so -shared` (OSX)
+4. Place libcjson.so in Lua's `package.cpath` (or modify `libcjson.lua` and point `ffi_load("libcjson")` with full path to `libcjson.so`, e.g. `local json = ffi_load("/usr/local/lib/lua/5.1/libcjson.so")`).
 
 
 ## Lua API
@@ -20,7 +20,7 @@ Decodes JSON value or structure (JSON array or object), and returns either Lua `
 ##### Example
 
 ```lua
-local json = require "resty.cjson"
+local json = require "resty.libcjson"
 local obj = json.decode "{}"       -- table (with obj.__jsontype == "object")
 local arr = json.decode "[]"       -- table (with arr.__jsontype == "array")
 local nbr = json.decode "1"        -- 1
@@ -45,7 +45,7 @@ Encodes Lua value or table, and returns equivalent JSON value or structure as a 
 ##### Example
 
 ```lua
-local json = require "resty.cjson"
+local json = require "resty.libcjson"
 local str = json.encode{}                              -- "[]"
 local str = json.encode(setmetatable({}, json.object)) -- "{}"
 local str = json.encode(1)                             -- "1"
@@ -65,11 +65,11 @@ Nested Lua tables are encoded as nested JSON structures (JSON objects or arrays)
 
 #### About JSON Arrays and Object Encoding and Decoding
 
-See this comment: https://github.com/bungle/lua-resty-cjson/issues/1#issuecomment-38567447.
+See this comment: https://github.com/bungle/lua-resty-libcjson/issues/1#issuecomment-38567447.
 
 ## License
 
-`lua-resty-cjson` uses two clause BSD license.
+`lua-resty-libcjson` uses two clause BSD license.
 
 ```
 Copyright (c) 2013, Aapo Talvensaari
