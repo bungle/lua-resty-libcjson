@@ -1,6 +1,6 @@
 # lua-resty-libcjson
 
-LuaJIT FFI-based cJSON library (tested with OpenResty too).
+`lua-resty-libcjson` is a LuaJIT FFI-based cJSON library (tested with OpenResty too).
 
 ## Compiling and Installing cJSON (manually)
 
