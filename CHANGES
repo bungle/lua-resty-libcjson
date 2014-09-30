@@ -1,0 +1,7 @@
+
+Changes with lua-resty-libcjson 1.0                                30 Sep 2014
+
+    *) Feature: LuaRocks Support via MoonRocks.
+
+    *) Change: Renamed module to libcjson to fix name conflict with
+       OpenResty's bundled cjson.
