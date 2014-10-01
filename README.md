@@ -2,7 +2,11 @@
 
 LuaJIT FFI-based cJSON library (tested with OpenResty too).
 
-## Compiling and Installing cJSON (manually)
+## Installation
+
+Just place [`libcjson.lua`](https://github.com/bungle/lua-resty-libcjson/blob/master/lib/resty/libcjson.lua) somewhere in your `package.path`, preferably under `resty` directory. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
+
+### Compiling and Installing cJSON C-library
 
 These are just rudimentary notes. Better installation instructions will follow:
 
@@ -11,6 +15,22 @@ These are just rudimentary notes. Better installation instructions will follow:
 3. Run `gcc cJSON.c -o libcjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -o libcjson.so -shared` (OSX)
 4. Place libcjson.so in Lua's `package.cpath` (or modify `libcjson.lua` and point `ffi_load("libcjson")` with full path to `libcjson.so`, e.g. `local json = ffi_load("/usr/local/lib/lua/5.1/libcjson.so")`).
 
+### Using LuaRocks or MoonRocks
+
+If you are using LuaRocks >= 2.2:
+
+```Shell
+$ luarocks install lua-resty-libcjson
+```
+
+If you are using LuaRocks < 2.2:
+
+```Shell
+$ luarocks install --server=http://rocks.moonscript.org moonrocks
+$ moonrocks install lua-resty-libcjson
+```
+
+MoonRocks repository for `lua-resty-libcjson`  is located here: https://rocks.moonscript.org/modules/bungle/lua-resty-libcjson.
 
 ## Lua API
 #### mixed json.decode(value)
