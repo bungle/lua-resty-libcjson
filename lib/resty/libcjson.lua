@@ -27,7 +27,6 @@ typedef struct cJSON {
     double valuedouble;
     char  *string;
 } cJSON;
-
 cJSON *cJSON_Parse(const char *value);
 char  *cJSON_Print(cJSON *item);
 char  *cJSON_PrintUnformatted(cJSON *item);
@@ -52,7 +51,7 @@ if not ok then
     newtab = function (narr, nrec) return {} end
 end
 
-local cjson = ffi_load("/Users/bungle/Sources/lua-resty-libcjson/lib/resty/libcjson.so")
+local cjson = ffi_load("libcjson")
 local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
