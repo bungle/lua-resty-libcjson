@@ -4,6 +4,7 @@ local ffi_typeof = ffi.typeof
 local ffi_cdef   = ffi.cdef
 local ffi_load   = ffi.load
 local ffi_str    = ffi.string
+local ffi_gc     = ffi.gc
 local next       = next
 local floor      = math.floor
 local max        = math.max
@@ -45,159 +46,92 @@ void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
 void   cJSON_Minify(char *json);
 ]]
 
-local ok, new_tab = pcall(require, "table.new")
+local ok, newtab = pcall(require, "table.new")
 
 if not ok then
-    new_tab = function (narr, nrec) return {} end
+    newtab = function (narr, nrec) return {} end
 end
 
-local cjson = ffi_load("libcjson")
-local json = new_tab(0, 6)
+local cjson = ffi_load("/Users/bungle/Sources/lua-resty-libcjson/lib/resty/libcjson.so")
+local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
 local mt_obj = { __index = { __jsontype = "object" }}
+local ctrue, cfalse, cnull = cjson.cJSON_CreateTrue(), cjson.cJSON_CreateFalse(), cjson.cJSON_CreateNull()
 
 local function is_array(t)
     local m, c = 0, 0
     for k, _ in pairs(t) do
-        if type(k) ~= "number" or k < 0 or floor(k) ~= k then
-            return false
-        else
-            m = max(m, k)
-            c = c + 1
-        end
+        if type(k) ~= "number" or k < 0 or floor(k) ~= k then return false end
+        m = max(m, k)
+        c = c + 1
     end
     return c == m
 end
 
 function json.decval(j)
     local t = j.type
-    if     t == 0 then
-        return false
-    elseif t == 1 then
-        return true
-    elseif t == 2 then
-        return null
-    elseif t == 3 then
-        return j.valuedouble
-    elseif t == 4 then
-        return ffi_str(j.valuestring)
-    elseif t == 5 then
-        return setmetatable(json.parse(j.child, cjson.cJSON_GetArraySize(j), 0) or {}, mt_arr)
-    elseif t == 6 then
-        return setmetatable(json.parse(j.child, 0, cjson.cJSON_GetArraySize(j)) or {}, mt_obj)
-    else
-        return nil
-    end
+    if t == 0 then return false end
+    if t == 1 then return true end
+    if t == 2 then return null end
+    if t == 3 then return j.valuedouble end
+    if t == 4 then return ffi_str(j.valuestring) end
+    if t == 5 then return setmetatable(json.parse(j.child, newtab(cjson.cJSON_GetArraySize(j), 0)) or {}, mt_arr) end
+    if t == 6 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
+    return nil
 end
 
-function json.parse(j, narr, nrec)
-    if j == nil then
-        return nil
-    else
-        local c = j;
-        local r = new_tab(narr, nrec)
-        repeat
-            local n
-            if c.string ~= nil then
-                n = ffi_str(c.string)
-            else
-                n = #r + 1
-            end
-            r[n] = json.decval(c)
-            c = c.next
-        until c == nil
-        return r
-    end
+function json.parse(j, r)
+    if j == nil then return nil end
+    local c = j
+    repeat
+        r[c.string ~= nil and ffi_str(c.string) or #r + 1] = json.decval(c)
+        c = c.next
+    until c == nil
+    return r
 end
 
 function json.decode(value)
-    if type(value) ~= "string" then
-        return value
-    end
-    local j = cjson.cJSON_Parse(value)
-    if j == nil then
-        return nil
-    end
-    local r
+    if type(value) ~= "string" then return value end
+    local j = ffi_gc(cjson.cJSON_Parse(value), cjson.cJSON_Delete)
+    if j == nil then return nil  end
     local t = j.type
-    if t == 5 then
-        r = setmetatable(json.parse(j.child, cjson.cJSON_GetArraySize(j), 0) or {}, mt_arr)
-    elseif t == 6 then
-        r = setmetatable(json.parse(j.child, 0, cjson.cJSON_GetArraySize(j)) or {}, mt_obj)
-    else
-        r = json.decval(j)
-    end
-    cjson.cJSON_Delete(j)
-    return r
+    if t == 5 then return setmetatable(json.parse(j.child, newtab(cjson.cJSON_GetArraySize(j), 0)) or {}, mt_arr) end
+    if t == 6 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
+    return json.decval(j)
 end
 
 function json.encval(value)
     local  t = type(value)
-    local  j
-    if     t == "string" then
-        j = cjson.cJSON_CreateString(value)
-    elseif t == "number" then
-        j = cjson.cJSON_CreateNumber(value)
-    elseif t == "boolean" then
-        if value then
-            j = cjson.cJSON_CreateTrue()
-        else
-            j = cjson.cJSON_CreateFalse()
-        end
-    elseif t == "nil" then
-        j = cjson.cJSON_CreateNull()
-    elseif t == "table" then
-        if next(value) == nil then
-            if getmetatable(value) ~= mt_obj and is_array(value) then
-                j = cjson.cJSON_CreateArray()
-            else
-                j = cjson.cJSON_CreateObject()
+    if t == "string"  then return cjson.cJSON_CreateString(value) end
+    if t == "number"  then return cjson.cJSON_CreateNumber(value) end
+    if t == "boolean" then return value and ctrue or cfalse       end
+    if t == "table" then
+        if next(value) == nil then return (getmetatable(value) ~= mt_obj and is_array(value)) and cjson.cJSON_CreateArray() or cjson.cJSON_CreateObject() end
+        if getmetatable(value) ~= mt_obj and is_array(value) then
+            local j = cjson.cJSON_CreateArray()
+            for _, v in ipairs(value) do
+                cjson.cJSON_AddItemToArray(j[0], json.encval(v))
             end
-        else
-            if getmetatable(value) ~= mt_obj and is_array(value) then
-                j = cjson.cJSON_CreateArray()
-                for _, v in ipairs(value) do
-                    cjson.cJSON_AddItemToArray(j[0], json.encval(v))
-                end
-            else
-                j = cjson.cJSON_CreateObject()
-                for k, v in pairs(value) do
-                    if type(k) ~= "string" then
-                        k = tostring(k)
-                    end
-                    cjson.cJSON_AddItemToObject(j[0], k, json.encval(v))
-                end
-            end
+            return j
         end
-    elseif value == null then
-        j = cjson.cJSON_CreateNull()
+        local j = cjson.cJSON_CreateObject()
+        for k, v in pairs(value) do
+            cjson.cJSON_AddItemToObject(j[0], type(k) ~= "string" and tostring(k) or k, json.encval(v))
+        end
+        return j
     end
-    return j
+    return cnull
 end
 
 function json.encode(value, formatted)
-    local j = json.encval(value)
-    if j == nil then
-        return nil
-    else
-        local f = formatted ~= false
-        local r
-        if f then
-            r = ffi_str(cjson.cJSON_Print(j))
-        else
-            r = ffi_str(cjson.cJSON_PrintUnformatted(j))
-        end
-        cjson.cJSON_Delete(j)
-        return r
-    end
+    local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
+    if j == nil then return nil end
+    return formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
 end
 
 function json.minify(value)
-    local t = value
-    if type(t) ~= "string" then
-        t = json.encode(t)
-    end
+    local t = type(value) ~= "string" and json.encode(t) or value
     local m = ffi_new(char_t, #t, t)
     cjson.cJSON_Minify(m)
     return ffi_str(m)
