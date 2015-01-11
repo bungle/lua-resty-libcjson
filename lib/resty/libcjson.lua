@@ -13,10 +13,7 @@ local next       = next
 local pairs      = pairs
 local ipairs     = ipairs
 local null       = {}
-if ngx and ngx.null then
-    null = ngx.null
-end
-
+if ngx and ngx.null then null = ngx.null end
 ffi_cdef[[
 typedef struct cJSON {
     struct cJSON *next, *prev;
@@ -44,20 +41,14 @@ void   cJSON_AddItemToArray(cJSON *array, cJSON *item);
 void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
 void   cJSON_Minify(char *json);
 ]]
-
 local ok, newtab = pcall(require, "table.new")
-
-if not ok then
-    newtab = function (narr, nrec) return {} end
-end
-
+if not ok then newtab = function() return {} end end
 local cjson = ffi_load("libcjson")
 local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
 local mt_obj = { __index = { __jsontype = "object" }}
 local ctrue, cfalse, cnull = cjson.cJSON_CreateTrue(), cjson.cJSON_CreateFalse(), cjson.cJSON_CreateNull()
-
 local function is_array(t)
     local m, c = 0, 0
     for k, _ in pairs(t) do
@@ -67,7 +58,6 @@ local function is_array(t)
     end
     return c == m
 end
-
 function json.decval(j)
     local t = j.type
     if t == 0 then return false end
@@ -79,7 +69,6 @@ function json.decval(j)
     if t == 6 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
     return nil
 end
-
 function json.parse(j, r)
     if j == nil then return nil end
     local c = j
@@ -89,7 +78,6 @@ function json.parse(j, r)
     until c == nil
     return r
 end
-
 function json.decode(value)
     if type(value) ~= "string" then return value end
     local j = ffi_gc(cjson.cJSON_Parse(value), cjson.cJSON_Delete)
@@ -99,7 +87,6 @@ function json.decode(value)
     if t == 6 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
     return json.decval(j)
 end
-
 function json.encval(value)
     local  t = type(value)
     if t == "string"  then return cjson.cJSON_CreateString(value) end
@@ -122,20 +109,17 @@ function json.encval(value)
     end
     return cnull
 end
-
 function json.encode(value, formatted)
     local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
     if j == nil then return nil end
     return formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
 end
-
 function json.minify(value)
     local t = type(value) ~= "string" and json.encode(t) or value
     local m = ffi_new(char_t, #t, t)
     cjson.cJSON_Minify(m)
     return ffi_str(m)
 end
-
 return {
     decode = json.decode,
     encode = json.encode,
