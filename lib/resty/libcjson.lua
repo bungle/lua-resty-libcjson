@@ -43,7 +43,7 @@ void   cJSON_Minify(char *json);
 ]]
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
-local cjson = ffi_load "cjson"
+local cjson = ffi_load "/Users/bungle/Sources/lua-resty-libcjson/lib/resty/libcjson.so"
 local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
@@ -110,7 +110,7 @@ function json.encval(value)
     return cnull
 end
 function json.encode(value, formatted)
-    local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
+    local j = json.encval(value)
     if j == nil then return nil end
     return formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
 end
