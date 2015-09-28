@@ -43,7 +43,7 @@ void   cJSON_Minify(char *json);
 ]]
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
-local cjson = ffi_load "/Users/bungle/Sources/lua-resty-libcjson/lib/resty/libcjson.so"
+local cjson = ffi_load "cjson"
 local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
