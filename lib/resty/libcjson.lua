@@ -43,7 +43,7 @@ void   cJSON_Minify(char *json);
 ]]
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
-local cjson = ffi_load("libcjson")
+local cjson = ffi_load "cjson"
 local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
