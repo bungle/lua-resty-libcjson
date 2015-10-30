@@ -94,10 +94,10 @@ About 190 MB citylots.json:
 ```bash
 # Lua cJSON
 Decoding Time: 5.882825
-Encoding Time: 0.791253
+Encoding Time: 4.902301
 # lua-resty-libcjson
 Decoding Time: 6.409872
-Encoding Time: 3.279753
+Encoding Time: xxx
 ```
 
 ## License
