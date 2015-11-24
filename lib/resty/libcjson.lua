@@ -99,9 +99,9 @@ function json.encval(value)
     if t == "string"  then return cjson.cJSON_CreateString(value) end
     if t == "number"  then
         if value ~= value then
-            return error("nan is not allowed in JSON")
+            return error "nan is not allowed in JSON"
         elseif value == inf or value == -inf then
-            return error("inf is not allowed in JSON")
+            return error "inf is not allowed in JSON"
         else
             return cjson.cJSON_CreateNumber(value)
         end
