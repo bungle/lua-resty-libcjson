@@ -97,7 +97,7 @@ Decoding Time: 5.882825
 Encoding Time: 4.902301
 # lua-resty-libcjson
 Decoding Time: 6.409872
-Encoding Time: xxx
+Encoding Time: (takes forever)
 ```
 
 ## License
