@@ -1,18 +1,25 @@
-local ffi        = require "ffi"
-local ffi_new    = ffi.new
-local ffi_typeof = ffi.typeof
-local ffi_cdef   = ffi.cdef
-local ffi_load   = ffi.load
-local ffi_str    = ffi.string
-local ffi_gc     = ffi.gc
-local next       = next
-local floor      = math.floor
-local max        = math.max
-local type       = type
-local next       = next
-local pairs      = pairs
-local ipairs     = ipairs
-local null       = {}
+local require      = require
+local ffi          = require "ffi"
+local ffi_new      = ffi.new
+local ffi_typeof   = ffi.typeof
+local ffi_cdef     = ffi.cdef
+local ffi_load     = ffi.load
+local ffi_str      = ffi.string
+local ffi_gc       = ffi.gc
+local next         = next
+local floor        = math.floor
+local inf          = 1 / 0
+local max          = math.max
+local pcall        = pcall
+local type         = type
+local next         = next
+local error        = error
+local pairs        = pairs
+local ipairs       = ipairs
+local tostring     = tostring
+local getmetatable = getmetatable
+local setmetatable = setmetatable
+local null         = {}
 if ngx and ngx.null then null = ngx.null end
 ffi_cdef[[
 typedef struct cJSON {
@@ -90,7 +97,17 @@ end
 function json.encval(value)
     local  t = type(value)
     if t == "string"  then return cjson.cJSON_CreateString(value) end
-    if t == "number"  then return cjson.cJSON_CreateNumber(value) end
+    if t == "number"  then
+        if value ~= value then
+            return error("nan is not allowed in JSON")
+        elseif value == inf then
+            return error("+inf is not allowed in JSON")
+        elseif value == -inf then
+            return error("-inf is not allowed in JSON")
+        else
+            return cjson.cJSON_CreateNumber(value)
+        end
+    end
     if t == "boolean" then return value and ctrue or cfalse       end
     if t == "table" then
         if next(value) == nil then return (getmetatable(value) ~= mt_obj and is_array(value)) and cjson.cJSON_CreateArray() or cjson.cJSON_CreateObject() end
