@@ -100,10 +100,8 @@ function json.encval(value)
     if t == "number"  then
         if value ~= value then
             return error("nan is not allowed in JSON")
-        elseif value == inf then
-            return error("+inf is not allowed in JSON")
-        elseif value == -inf then
-            return error("-inf is not allowed in JSON")
+        elseif value == inf or value == -inf then
+            return error("inf is not allowed in JSON")
         else
             return cjson.cJSON_CreateNumber(value)
         end
