@@ -96,8 +96,9 @@ function json.decode(value)
 end
 function json.encval(value)
     local  t = type(value)
-    if t == "string"  then return cjson.cJSON_CreateString(value) end
-    if t == "number"  then
+    if t == "string" then
+        return cjson.cJSON_CreateString(value)
+    elseif t == "number" then
         if value ~= value then
             return error "nan is not allowed in JSON"
         elseif value == inf or value == -inf then
@@ -105,9 +106,9 @@ function json.encval(value)
         else
             return cjson.cJSON_CreateNumber(value)
         end
-    end
-    if t == "boolean" then return value and ctrue or cfalse       end
-    if t == "table" then
+    elseif t == "boolean" then
+        return value and ctrue or cfalse
+    elseif t == "table" then
         if next(value) == nil then return (getmetatable(value) ~= mt_obj and is_array(value)) and cjson.cJSON_CreateArray() or cjson.cJSON_CreateObject() end
         if getmetatable(value) ~= mt_obj and is_array(value) then
             local j = cjson.cJSON_CreateArray()
@@ -121,8 +122,9 @@ function json.encval(value)
             cjson.cJSON_AddItemToObject(j[0], type(k) ~= "string" and tostring(k) or k, json.encval(v))
         end
         return j
+    else
+        return cnull
     end
-    return cnull
 end
 function json.encode(value, formatted)
     local j = json.encval(value)
