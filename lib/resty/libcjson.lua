@@ -55,7 +55,6 @@ local json = newtab(0, 6)
 local char_t = ffi_typeof("char[?]")
 local mt_arr = { __index = { __jsontype = "array"  }}
 local mt_obj = { __index = { __jsontype = "object" }}
-local ctrue, cfalse, cnull = cjson.cJSON_CreateTrue(), cjson.cJSON_CreateFalse(), cjson.cJSON_CreateNull()
 local function is_array(t)
     local m, c = 0, 0
     for k, _ in pairs(t) do
@@ -107,7 +106,7 @@ function json.encval(value)
             return cjson.cJSON_CreateNumber(value)
         end
     elseif t == "boolean" then
-        return value and ctrue or cfalse
+        return value and cjson.cJSON_CreateTrue() or cjson.cJSON_CreateFalse()
     elseif t == "table" then
         if next(value) == nil then return (getmetatable(value) ~= mt_obj and is_array(value)) and cjson.cJSON_CreateArray() or cjson.cJSON_CreateObject() end
         if getmetatable(value) ~= mt_obj and is_array(value) then
@@ -123,7 +122,7 @@ function json.encval(value)
         end
         return j
     else
-        return cnull
+        return cjson.cJSON_CreateNull()
     end
 end
 function json.encode(value, formatted)
