@@ -127,10 +127,9 @@ function json.encval(value)
     end
 end
 function json.encode(value, formatted)
-    local j = json.encval(value)
+    local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
     if j == nil then return nil end
     local encoded = formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
-    cjson.cJSON_Delete(j)
     return encoded
 end
 function json.minify(value)
