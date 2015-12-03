@@ -129,8 +129,7 @@ end
 function json.encode(value, formatted)
     local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
     if j == nil then return nil end
-    local encoded = formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
-    return encoded
+    return formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
 end
 function json.minify(value)
     local t = type(value) ~= "string" and json.encode(value) or value
