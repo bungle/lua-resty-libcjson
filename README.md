@@ -105,7 +105,7 @@ Encoding Time: (takes forever)
 `lua-resty-libcjson` uses two clause BSD license.
 
 ```
-Copyright (c) 2013, Aapo Talvensaari
+Copyright (c) 2014 - 2016, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

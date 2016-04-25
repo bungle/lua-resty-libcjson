@@ -6,6 +6,7 @@ local ffi_cdef     = ffi.cdef
 local ffi_load     = ffi.load
 local ffi_str      = ffi.string
 local ffi_gc       = ffi.gc
+local C            = ffi.C
 local next         = next
 local floor        = math.floor
 local inf          = 1 / 0
@@ -47,6 +48,7 @@ cJSON *cJSON_CreateObject(void);
 void   cJSON_AddItemToArray(cJSON *array, cJSON *item);
 void   cJSON_AddItemToObject(cJSON *object,const char *string,cJSON *item);
 void   cJSON_Minify(char *json);
+void   free(void *ptr);
 ]]
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
@@ -128,7 +130,7 @@ end
 function json.encode(value, formatted)
     local j = ffi_gc(json.encval(value), cjson.cJSON_Delete)
     if j == nil then return nil end
-    return formatted ~= false and ffi_str(cjson.cJSON_Print(j)) or ffi_str(cjson.cJSON_PrintUnformatted(j))
+    return formatted ~= false and ffi_str(ffi_gc(cjson.cJSON_Print(j), C.free)) or ffi_str(ffi_gc(cjson.cJSON_PrintUnformatted(j), C.free))
 end
 function json.minify(value)
     local t = type(value) ~= "string" and json.encode(value) or value
