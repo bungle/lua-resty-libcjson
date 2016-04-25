@@ -114,13 +114,13 @@ function json.encval(value)
         if getmetatable(value) ~= mt_obj and is_array(value) then
             local j = cjson.cJSON_CreateArray()
             for _, v in ipairs(value) do
-                cjson.cJSON_AddItemToArray(j[0], json.encval(v))
+                cjson.cJSON_AddItemToArray(j, json.encval(v))
             end
             return j
         end
         local j = cjson.cJSON_CreateObject()
         for k, v in pairs(value) do
-            cjson.cJSON_AddItemToObject(j[0], type(k) ~= "string" and tostring(k) or k, json.encval(v))
+            cjson.cJSON_AddItemToObject(j, type(k) ~= "string" and tostring(k) or k, json.encval(v))
         end
         return j
     else

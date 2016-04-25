@@ -1,3 +1,7 @@
+Changes with lua-resty-libcjson 1.3                                25 Apr 2016
+
+    *) Just a small adjustments.
+
 Changes with lua-resty-libcjson 1.2                                25 Apr 2016
 
     *) Bugfix: Fixed a memory leak on cjson.cJSON_Print char *.
