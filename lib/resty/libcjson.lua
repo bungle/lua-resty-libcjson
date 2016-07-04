@@ -68,13 +68,13 @@ local function is_array(t)
 end
 function json.decval(j)
     local t = j.type
-    if t == 0 then return false end
-    if t == 1 then return true end
-    if t == 2 then return null end
-    if t == 3 then return j.valuedouble end
-    if t == 4 then return ffi_str(j.valuestring) end
-    if t == 5 then return setmetatable(json.parse(j.child, newtab(cjson.cJSON_GetArraySize(j), 0)) or {}, mt_arr) end
-    if t == 6 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
+    if t == 1 then return false end
+    if t == 2 then return true end
+    if t == 4 then return null end
+    if t == 8 then return j.valuedouble end
+    if t == 16 then return ffi_str(j.valuestring) end
+    if t == 32 then return setmetatable(json.parse(j.child, newtab(cjson.cJSON_GetArraySize(j), 0)) or {}, mt_arr) end
+    if t == 64 then return setmetatable(json.parse(j.child, newtab(0, cjson.cJSON_GetArraySize(j))) or {}, mt_obj) end
     return nil
 end
 function json.parse(j, r)
