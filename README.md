@@ -10,7 +10,7 @@ Just place [`libcjson.lua`](https://github.com/bungle/lua-resty-libcjson/blob/ma
 
 These are just rudimentary notes. Better installation instructions will follow:
 
-1. First clone this repo: https://github.com/kbranigan/cJSON (or download cJSON (zip-file) from here: http://sourceforge.net/projects/cjson/files/latest/download)
+1. First clone this repo: https://github.com/DaveGamble/cJSON (or https://github.com/kbranigan/cJSON) (or download cJSON (zip-file) from here: http://sourceforge.net/projects/cjson/files/latest/download)
 2. Unzip / Extract the archive
 3. Run `gcc cJSON.c -O3 -o libcjson.so -shared -fPIC` (on Linux) or `gcc cJSON.c -O3 -o libcjson.dylib -shared` (OS X)
 4. Place `libcjson.so` somewhere in the default search path for dynamic libraries of your operating system (or modify `libcjson.lua` and point `ffi_load "cjson"` with full path to `libcjson.so`, e.g. `local json = ffi_load("/usr/local/lib/lua/5.1/libcjson.so")`).
